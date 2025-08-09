@@ -1,14 +1,13 @@
-import os
-import pdb
-import sys
-import json
-import numpy as np
 import argparse
-import sqlite3
-import multiprocessing as mp
-from func_timeout import func_timeout, FunctionTimedOut
-import time
+import json
 import math
+import multiprocessing as mp
+import sqlite3
+import sys
+import time
+
+from func_timeout import FunctionTimedOut, func_timeout
+import numpy as np
 
 
 def result_callback(result):
@@ -72,10 +71,10 @@ def execute_model(
     except KeyboardInterrupt:
         sys.exit(0)
     except FunctionTimedOut:
-        result = [(f"timeout",)]
+        result = [("timeout",)]
         time_ratio = 0
-    except Exception as e:
-        result = [(f"error",)]  # possibly len(query) > 512 or not executable
+    except Exception:
+        result = [("error",)]  # possibly len(query) > 512 or not executable
         time_ratio = 0
     result = {"sql_idx": idx, "time_ratio": time_ratio}
     return result
@@ -85,7 +84,7 @@ def package_sqls(sql_path, db_root_path, mode="gpt", data_mode="dev"):
     clean_sqls = []
     db_path_list = []
     if mode == "gpt":
-        sql_data = json.load(open(sql_path + "predict_" + data_mode + ".json", "r"))
+        sql_data = json.load(open(sql_path + "predict_" + data_mode + ".json"))
         for idx, sql_str in sql_data.items():
             if type(sql_str) == str:
                 sql, db_name = sql_str.split("\t----- bird -----\t")
@@ -143,7 +142,7 @@ def compute_ves(exec_results):
 
 
 def load_json(dir):
-    with open(dir, "r") as j:
+    with open(dir) as j:
         contents = json.loads(j.read())
     return contents
 
@@ -210,7 +209,7 @@ if __name__ == "__main__":
         args.ground_truth_path, args.db_root_path, mode="gt", data_mode=args.data_mode
     )
 
-    query_pairs = list(zip(pred_queries, gt_queries))
+    query_pairs = list(zip(pred_queries, gt_queries, strict=False))
     run_sqls_parallel(
         query_pairs,
         db_places=db_paths,

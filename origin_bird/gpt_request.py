@@ -1,18 +1,11 @@
 #!/usr/bin/env python3
 import argparse
-import fnmatch
 import json
 import os
-import pdb
-import pickle
-import re
 import sqlite3
-from typing import Dict, List, Tuple
 
 import backoff
 import openai
-import pandas as pd
-import sqlparse
 from tqdm import tqdm
 
 """openai configure"""
@@ -25,7 +18,7 @@ def new_directory(path):
         os.makedirs(path)
 
 
-def get_db_schemas(bench_root: str, db_name: str) -> Dict[str, str]:
+def get_db_schemas(bench_root: str, db_name: str) -> dict[str, str]:
     """
     Read an sqlite file, and return the CREATE commands for each of the tables in the database.
     """
@@ -40,9 +33,7 @@ def get_db_schemas(bench_root: str, db_name: str) -> Dict[str, str]:
         schemas = {}
         for table in tables:
             cursor.execute(
-                "SELECT sql FROM sqlite_master WHERE type='table' AND name='{}';".format(
-                    table[0]
-                )
+                f"SELECT sql FROM sqlite_master WHERE type='table' AND name='{table[0]}';"
             )
             schemas[table[0]] = cursor.fetchone()[0]
 
@@ -59,12 +50,12 @@ def nice_look_table(column_names: list, values: list):
 
     # Print the column names
     header = "".join(
-        f"{column.rjust(width)} " for column, width in zip(column_names, widths)
+        f"{column.rjust(width)} " for column, width in zip(column_names, widths, strict=False)
     )
     # print(header)
     # Print the values
     for value in values:
-        row = "".join(f"{str(v).rjust(width)} " for v, width in zip(value, widths))
+        row = "".join(f"{str(v).rjust(width)} " for v, width in zip(value, widths, strict=False))
         rows.append(row)
     rows = "\n".join(rows)
     final_output = header + "\n" + rows
@@ -89,25 +80,21 @@ def generate_schema_prompt(db_path, num_rows=None):
         if table == "sqlite_sequence":
             continue
         cursor.execute(
-            "SELECT sql FROM sqlite_master WHERE type='table' AND name='{}';".format(
-                table[0]
-            )
+            f"SELECT sql FROM sqlite_master WHERE type='table' AND name='{table[0]}';"
         )
         create_prompt = cursor.fetchone()[0]
         schemas[table[0]] = create_prompt
         if num_rows:
             cur_table = table[0]
             if cur_table in ["order", "by", "group"]:
-                cur_table = "`{}`".format(cur_table)
+                cur_table = f"`{cur_table}`"
 
-            cursor.execute("SELECT * FROM {} LIMIT {}".format(cur_table, num_rows))
+            cursor.execute(f"SELECT * FROM {cur_table} LIMIT {num_rows}")
             column_names = [description[0] for description in cursor.description]
             values = cursor.fetchall()
             rows_prompt = nice_look_table(column_names=column_names, values=values)
-            verbose_prompt = "/* \n {} example rows: \n SELECT * FROM {} LIMIT {}; \n {} \n */".format(
-                num_rows, cur_table, num_rows, rows_prompt
-            )
-            schemas[table[0]] = "{} \n {}".format(create_prompt, verbose_prompt)
+            verbose_prompt = f"/* \n {num_rows} example rows: \n SELECT * FROM {cur_table} LIMIT {num_rows}; \n {rows_prompt} \n */"
+            schemas[table[0]] = f"{create_prompt} \n {verbose_prompt}"
 
     for k, v in schemas.items():
         full_schema_prompt_list.append(v)
@@ -121,8 +108,8 @@ def generate_comment_prompt(question, knowledge=None):
     pattern_prompt_no_kg = "-- Using valid SQLite, answer the following questions for the tables provided above."
     pattern_prompt_kg = "-- Using valid SQLite and understading External Knowledge, answer the following questions for the tables provided above."
     # question_prompt = "-- {}".format(question) + '\n SELECT '
-    question_prompt = "-- {}".format(question)
-    knowledge_prompt = "-- External Knowledge: {}".format(knowledge)
+    question_prompt = f"-- {question}"
+    knowledge_prompt = f"-- External Knowledge: {knowledge}"
 
     if not knowledge_prompt:
         result_prompt = pattern_prompt_no_kg + "\n" + question_prompt
@@ -198,7 +185,7 @@ def connect_gpt(engine, prompt, max_tokens, temperature, stop):
             stop=stop,
         )
     except Exception as e:
-        result = "error:{}".format(e)
+        result = f"error:{e}"
     return result
 
 
@@ -215,11 +202,9 @@ def collect_response_from_gpt(
     openai.api_key = api_key
     for i, question in tqdm(enumerate(question_list)):
         print(
-            "--------------------- processing {}th question ---------------------".format(
-                i
-            )
+            f"--------------------- processing {i}th question ---------------------"
         )
-        print("the question is: {}".format(question))
+        print(f"the question is: {question}")
 
         if knowledge_list:
             cur_prompt = generate_combined_prompts_one(
@@ -314,7 +299,7 @@ if __name__ == "__main__":
     args_parser.add_argument("--chain_of_thought", type=str)
     args = args_parser.parse_args()
 
-    eval_data = json.load(open(args.eval_path, "r"))
+    eval_data = json.load(open(args.eval_path))
     # '''for debug'''
     # eval_data = eval_data[:3]
     # '''for debug'''
@@ -349,7 +334,5 @@ if __name__ == "__main__":
     generate_sql_file(sql_lst=responses, output_path=output_name)
 
     print(
-        "successfully collect results from {} for {} evaluation; Use knowledge: {}; Use COT: {}".format(
-            args.engine, args.mode, args.use_knowledge, args.chain_of_thought
-        )
+        f"successfully collect results from {args.engine} for {args.mode} evaluation; Use knowledge: {args.use_knowledge}; Use COT: {args.chain_of_thought}"
     )

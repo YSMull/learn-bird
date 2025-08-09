@@ -1,6 +1,5 @@
-import json
 import argparse
-import pdb
+import json
 
 
 def fetch_sql(predicted_results, output_path=None):
@@ -9,15 +8,13 @@ def fetch_sql(predicted_results, output_path=None):
     for k, v in predicted_results.items():
         idx = int(k)
         print(
-            "------------------- processing {}th example -------------------".format(
-                idx
-            )
+            f"------------------- processing {idx}th example -------------------"
         )
         print(v)
         try:
             cot, sql = v.split(": SELECT")
             clean_sql = "SELECT" + sql
-        except Exception as e:
+        except Exception:
             invalid_result.append(idx)
             clean_sql = 0  # filter resutls without valid SQL, i.e., too long, etc.
         final_sql[k] = clean_sql
@@ -37,11 +34,9 @@ if __name__ == "__main__":
     exec_result = []
 
     # generate sql file:
-    pred_file = json.load(open(args.predicted_sql_path, "r"))
+    pred_file = json.load(open(args.predicted_sql_path))
     post_sql, invalid_results = fetch_sql(pred_file, args.output_clean_path)
 
     print(
-        "filtered results, among {} examples, {} results are invaid".format(
-            len(post_sql), len(invalid_results)
-        )
+        f"filtered results, among {len(post_sql)} examples, {len(invalid_results)} results are invaid"
     )
