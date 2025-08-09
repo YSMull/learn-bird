@@ -87,7 +87,8 @@ if __name__ == "__main__":
     not_use_knowledge = True
     mode = "dev"
     # model='openai/gpt-oss-20b'
-    model = "omnisql-7b-mlx"
+    # model = "omnisql-7b-mlx"
+    model = "deepseek-v3-250324"
     data_output_path = cur_dir_path + "../exp_result/turbo_output/"
 
     eval_data = json.load(open(eval_path))

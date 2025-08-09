@@ -112,12 +112,12 @@ def few_shot():
 
 def generate_combined_prompts_one(db_path, question, knowledge=None):
     schema_prompt = generate_schema_prompt(
-        db_path, num_rows=None
+        db_path, num_rows=4
     )  # This is the entry to collect values
     comment_prompt = generate_comment_prompt(question, knowledge)
 
     combined_prompts = schema_prompt + "\n\n" + comment_prompt + cot_wizard()
-    # combined_prompts = few_shot() + '\n\n' + schema_prompt + '\n\n' + comment_prompt
+    # combined_prompts = few_shot() + '\n\n' + schema_prompt + '\n\n' + comment_prompt + cot_wizard()
 
     # print(combined_prompts)
 

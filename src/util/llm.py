@@ -6,7 +6,7 @@ client = OpenAI(
 )
 
 
-def llm(prompt, model="openai/gpt-oss-20b", max_tokens=1000, temperature=0.7):
+def llm(prompt, model, max_tokens=1000, temperature=0.7):
     stream_response = client.chat.completions.create(
         model=model,
         stream=True,
