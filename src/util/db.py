@@ -7,7 +7,7 @@ def get_db_schemas(bench_root: str, db_name: str) -> dict[str, str]:
     """
     asdf = "database" if bench_root == "spider" else "databases"
     with sqlite3.connect(
-            f"file:{bench_root}/{asdf}/{db_name}/{db_name}.sqlite?mode=ro", uri=True
+        f"file:{bench_root}/{asdf}/{db_name}/{db_name}.sqlite?mode=ro", uri=True
     ) as conn:
         # conn.text_factory = bytes
         cursor = conn.cursor()

@@ -11,12 +11,15 @@ def nice_look_table(column_names: list, values: list):
 
     # Print the column names
     header = "".join(
-        f"{column.rjust(width)} " for column, width in zip(column_names, widths, strict=False)
+        f"{column.rjust(width)} "
+        for column, width in zip(column_names, widths, strict=False)
     )
     # print(header)
     # Print the values
     for value in values:
-        row = "".join(f"{str(v).rjust(width)} " for v, width in zip(value, widths, strict=False))
+        row = "".join(
+            f"{str(v).rjust(width)} " for v, width in zip(value, widths, strict=False)
+        )
         rows.append(row)
     rows = "\n".join(rows)
     final_output = header + "\n" + rows
@@ -76,7 +79,7 @@ def generate_comment_prompt(question, knowledge=None):
         result_prompt = pattern_prompt_no_kg + "\n" + question_prompt
     else:
         result_prompt = (
-                knowledge_prompt + "\n" + pattern_prompt_kg + "\n" + question_prompt
+            knowledge_prompt + "\n" + pattern_prompt_kg + "\n" + question_prompt
         )
 
     return result_prompt
@@ -113,9 +116,7 @@ def generate_combined_prompts_one(db_path, question, knowledge=None):
     )  # This is the entry to collect values
     comment_prompt = generate_comment_prompt(question, knowledge)
 
-    combined_prompts = (
-            schema_prompt + "\n\n" + comment_prompt + cot_wizard()
-    )
+    combined_prompts = schema_prompt + "\n\n" + comment_prompt + cot_wizard()
     # combined_prompts = few_shot() + '\n\n' + schema_prompt + '\n\n' + comment_prompt
 
     # print(combined_prompts)

@@ -11,6 +11,7 @@ def new_directory(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
+
 def generate_sql_file(sql_lst, output_path=None):
     result = {}
     for i, sql in enumerate(sql_lst):
@@ -23,6 +24,7 @@ def generate_sql_file(sql_lst, output_path=None):
 
     return result
 
+
 def collect_response_from_llm(
     db_path_list, question_list, model, output_path, knowledge_list=None
 ):
@@ -34,9 +36,7 @@ def collect_response_from_llm(
     responses_dict = {}
     response_list = []
     for i, question in tqdm(enumerate(question_list)):
-        print(
-            f"--------------------- processing {i}th question ---------------------"
-        )
+        print(f"--------------------- processing {i}th question ---------------------")
         print(f"the question is: {question}")
 
         if knowledge_list:
@@ -49,10 +49,7 @@ def collect_response_from_llm(
             )
 
         sql_response = llm(
-            model=model,
-            prompt=cur_prompt,
-            max_tokens=2000,
-            temperature=0
+            model=model, prompt=cur_prompt, max_tokens=2000, temperature=0
         )
         # pdb.set_trace()
         # plain_result = request_llm(engine=engine, prompt=cur_prompt, max_tokens=256, temperature=0, stop=['</s>'])
@@ -80,17 +77,18 @@ def decouple_question_schema(datasets, db_root_path):
 
     return question_list, db_path_list, knowledge_list
 
+
 if __name__ == "__main__":
-    cur_dir_path = os.path.dirname(os.path.abspath(__file__)) + '/'
-    eval_path= cur_dir_path + '../data/dev/dev.json'
-    dev_path=cur_dir_path + '../output/'
-    db_root_path=cur_dir_path + '../data/dev/dev_databases/'
-    use_knowledge=True
-    not_use_knowledge=True
-    mode='dev'
+    cur_dir_path = os.path.dirname(os.path.abspath(__file__)) + "/"
+    eval_path = cur_dir_path + "../data/dev/dev.json"
+    dev_path = cur_dir_path + "../output/"
+    db_root_path = cur_dir_path + "../data/dev/dev_databases/"
+    use_knowledge = True
+    not_use_knowledge = True
+    mode = "dev"
     # model='openai/gpt-oss-20b'
-    model='omnisql-7b-mlx'
-    data_output_path=cur_dir_path + '../exp_result/turbo_output/'
+    model = "omnisql-7b-mlx"
+    data_output_path = cur_dir_path + "../exp_result/turbo_output/"
 
     eval_data = json.load(open(eval_path))
     # '''for debug'''
@@ -110,7 +108,7 @@ if __name__ == "__main__":
             question_list=question_list,
             model=model,
             knowledge_list=knowledge_list,
-            output_path=output_path
+            output_path=output_path,
         )
     else:
         responses = collect_response_from_llm(
@@ -118,10 +116,9 @@ if __name__ == "__main__":
             question_list=question_list,
             model=model,
             knowledge_list=None,
-            output_path=output_path
+            output_path=output_path,
         )
 
-    
     # pdb.set_trace()
 
     print(
