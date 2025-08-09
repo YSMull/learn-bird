@@ -82,15 +82,16 @@ def decouple_question_schema(datasets, db_root_path):
     return question_list, db_path_list, knowledge_list
 
 if __name__ == "__main__":
-    eval_path='../data/dev/dev.json'
-    dev_path='../output/'
-    db_root_path='../data/dev/dev_databases/'
+    cur_dir_path = os.path.dirname(os.path.abspath(__file__)) + '/'
+    eval_path= cur_dir_path + '../data/dev/dev.json'
+    dev_path=cur_dir_path + '../output/'
+    db_root_path=cur_dir_path + '../data/dev/dev_databases/'
     use_knowledge=True
     not_use_knowledge=True
     mode='dev'
-    model='openai/gpt-oss-20b'
-    # model='omnisql-7b-mlx'
-    data_output_path='../exp_result/turbo_output/'
+    # model='openai/gpt-oss-20b'
+    model='omnisql-7b-mlx'
+    data_output_path=cur_dir_path + '../exp_result/turbo_output/'
 
     eval_data = json.load(open(eval_path, "r"))
     # '''for debug'''

@@ -1,3 +1,4 @@
+import os
 import sys
 import json
 import sqlite3
@@ -122,13 +123,14 @@ def print_data(score_lists, count_lists):
 
 
 if __name__ == '__main__':
+    cur_dir_path = os.path.dirname(os.path.abspath(__file__)) + '/'
     exec_result = []
-    predicted_sql_path = '../exp_result/turbo_output/'
-    db_root_path = '../data/dev/dev_databases/'
+    predicted_sql_path = cur_dir_path + '../exp_result/turbo_output/'
+    db_root_path = cur_dir_path + '../data/dev/dev_databases/'
     data_mode = 'dev'
-    ground_truth_path = '../data/dev/'
+    ground_truth_path = cur_dir_path + '../data/dev/'
     num_cpus = 16
-    diff_json_path = '../data/dev/dev.json'
+    diff_json_path = cur_dir_path + '../data/dev/dev.json'
 
     pred_queries, db_paths = package_sqls(predicted_sql_path, db_root_path, mode="gpt",
                                           data_mode=data_mode)
