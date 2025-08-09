@@ -11,3 +11,46 @@ dependencies = [
     "pandas>=2.3.1",
     "sqlparse>=0.5.3",
 ]
+
+[tool.ruff]
+# 要扫描的路径（可以是 src, tests 等）
+src = ["src"]
+# 是否自动修复（等同于 --fix）
+fix = true
+# 最大行长度（和 black 一致，方便配合使用）
+line-length = 88
+# Python 版本（影响 Ruff 规则）
+target-version = "py311"
+
+# 选择启用的规则集合
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "B",   # flake8-bugbear
+    "I",   # isort（导入排序）
+    "UP",  # pyupgrade（升级到现代语法）
+    "C90", # mccabe（复杂度检查）
+]
+
+# 忽略特定规则
+ignore = [
+    "E501",  # 忽略超长行（交给 black 处理）
+]
+# 排除不检查的路径
+exclude = [
+    ".git",
+    "__pycache__",
+    ".venv",
+    "build",
+    "dist",
+    "migrations",
+]
+
+# 最大函数复杂度
+[tool.ruff.mccabe]
+max-complexity = 10
+
+# isort 相关设置
+[tool.ruff.isort]
+combine-as-imports = true
+force-sort-within-sections = true

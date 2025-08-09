@@ -1,13 +1,12 @@
-import os
-import sys
 import json
-import sqlite3
 import multiprocessing as mp
-from func_timeout import func_timeout, FunctionTimedOut
+import os
 import re
+import sqlite3
+
 
 def load_json(dir):
-    with open(dir, 'r') as j:
+    with open(dir) as j:
         contents = json.loads(j.read())
     return contents
 
@@ -40,7 +39,7 @@ def execute_sql(predicted_sql, ground_truth, db_path):
 def execute_model(predicted_sql, ground_truth, db_place, idx):
     try:
         res = execute_sql(predicted_sql, ground_truth, db_place)
-    except Exception as e:
+    except Exception:
         res = 0
     # print(result)
     # result = str(set([ret[0] for ret in result]))
@@ -52,7 +51,7 @@ def package_sqls(sql_path, db_root_path, mode='gpt', data_mode='dev'):
     clean_sqls = []
     db_path_list = []
     if mode == 'gpt':
-        sql_data = json.load(open(sql_path + 'predict_' + data_mode + '.json', 'r'))
+        sql_data = json.load(open(sql_path + 'predict_' + data_mode + '.json'))
         for idx, sql_str in sql_data.items():
             if type(sql_str) == str:
                 sql, db_name = sql_str.split('\t----- bird -----\t')
@@ -95,7 +94,7 @@ def compute_acc_by_diff(exec_results, diff_json_path):
 
     for i, content in enumerate(contents):
         if i >= len(results):
-            break;
+            break
         if content['difficulty'] == 'simple':
             simple_results.append(exec_results[i])
 
@@ -137,7 +136,7 @@ if __name__ == '__main__':
     gt_queries, db_paths_gt = package_sqls(ground_truth_path, db_root_path, mode='gt',
                                            data_mode=data_mode)
 
-    query_pairs = list(zip(pred_queries, gt_queries))
+    query_pairs = list(zip(pred_queries, gt_queries, strict=False))
     run_sqls_parallel(query_pairs, db_places=db_paths, num_cpus=num_cpus)
     exec_result = sort_results(exec_result)
 

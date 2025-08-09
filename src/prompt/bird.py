@@ -11,12 +11,12 @@ def nice_look_table(column_names: list, values: list):
 
     # Print the column names
     header = "".join(
-        f"{column.rjust(width)} " for column, width in zip(column_names, widths)
+        f"{column.rjust(width)} " for column, width in zip(column_names, widths, strict=False)
     )
     # print(header)
     # Print the values
     for value in values:
-        row = "".join(f"{str(v).rjust(width)} " for v, width in zip(value, widths))
+        row = "".join(f"{str(v).rjust(width)} " for v, width in zip(value, widths, strict=False))
         rows.append(row)
     rows = "\n".join(rows)
     final_output = header + "\n" + rows
@@ -41,25 +41,21 @@ def generate_schema_prompt(db_path, num_rows=None):
         if table == "sqlite_sequence":
             continue
         cursor.execute(
-            "SELECT sql FROM sqlite_master WHERE type='table' AND name='{}';".format(
-                table[0]
-            )
+            f"SELECT sql FROM sqlite_master WHERE type='table' AND name='{table[0]}';"
         )
         create_prompt = cursor.fetchone()[0]
         schemas[table[0]] = create_prompt
         if num_rows:
             cur_table = table[0]
             if cur_table in ["order", "by", "group"]:
-                cur_table = "`{}`".format(cur_table)
+                cur_table = f"`{cur_table}`"
 
-            cursor.execute("SELECT * FROM {} LIMIT {}".format(cur_table, num_rows))
+            cursor.execute(f"SELECT * FROM {cur_table} LIMIT {num_rows}")
             column_names = [description[0] for description in cursor.description]
             values = cursor.fetchall()
             rows_prompt = nice_look_table(column_names=column_names, values=values)
-            verbose_prompt = "/* \n {} example rows: \n SELECT * FROM {} LIMIT {}; \n {} \n */".format(
-                num_rows, cur_table, num_rows, rows_prompt
-            )
-            schemas[table[0]] = "{} \n {}".format(create_prompt, verbose_prompt)
+            verbose_prompt = f"/* \n {num_rows} example rows: \n SELECT * FROM {cur_table} LIMIT {num_rows}; \n {rows_prompt} \n */"
+            schemas[table[0]] = f"{create_prompt} \n {verbose_prompt}"
 
     for k, v in schemas.items():
         full_schema_prompt_list.append(v)
@@ -73,8 +69,8 @@ def generate_comment_prompt(question, knowledge=None):
     pattern_prompt_no_kg = "-- Using valid SQLite, answer the following questions for the tables provided above."
     pattern_prompt_kg = "-- Using valid SQLite and understading External Knowledge, answer the following questions for the tables provided above."
     # question_prompt = "-- {}".format(question) + '\n SELECT '
-    question_prompt = "-- {}".format(question)
-    knowledge_prompt = "-- External Knowledge: {}".format(knowledge)
+    question_prompt = f"-- {question}"
+    knowledge_prompt = f"-- External Knowledge: {knowledge}"
 
     if not knowledge_prompt:
         result_prompt = pattern_prompt_no_kg + "\n" + question_prompt

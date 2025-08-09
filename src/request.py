@@ -6,6 +6,7 @@ from tqdm import tqdm
 from prompt.bird import generate_combined_prompts_one
 from util.llm import llm
 
+
 def new_directory(path):
     if not os.path.exists(path):
         os.makedirs(path)
@@ -34,11 +35,9 @@ def collect_response_from_llm(
     response_list = []
     for i, question in tqdm(enumerate(question_list)):
         print(
-            "--------------------- processing {}th question ---------------------".format(
-                i
-            )
+            f"--------------------- processing {i}th question ---------------------"
         )
-        print("the question is: {}".format(question))
+        print(f"the question is: {question}")
 
         if knowledge_list:
             cur_prompt = generate_combined_prompts_one(
@@ -93,7 +92,7 @@ if __name__ == "__main__":
     model='omnisql-7b-mlx'
     data_output_path=cur_dir_path + '../exp_result/turbo_output/'
 
-    eval_data = json.load(open(eval_path, "r"))
+    eval_data = json.load(open(eval_path))
     # '''for debug'''
     eval_data = eval_data[:13]
     # '''for debug'''
@@ -126,7 +125,5 @@ if __name__ == "__main__":
     # pdb.set_trace()
 
     print(
-        "successfully collect results from {} for {} evaluation; Use knowledge: {}; Use COT: {}".format(
-            model, mode, use_knowledge, True
-        )
+        f"successfully collect results from {model} for {mode} evaluation; Use knowledge: {use_knowledge}; Use COT: {True}"
     )
