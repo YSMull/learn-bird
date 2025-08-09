@@ -19,7 +19,9 @@ def llm(prompt, model="openai/gpt-oss-20b", max_tokens=1000, temperature=0.7):
         ]
     )
     collected_chunks = []
+    print("")
     for chunk in stream_response:
         if chunk.choices and chunk.choices[0].delta.content:
             collected_chunks.append(chunk.choices[0].delta.content)
+            # print(chunk.choices[0].delta.content, end="", flush=True)
     return "".join(collected_chunks)
